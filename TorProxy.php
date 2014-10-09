@@ -2,10 +2,10 @@
 
 class TorProxy
 {
-	const START_PORT = 9050;
+    const START_PORT = 9050;
 	const DELAY_START = 5;
-	
-	private $pid;
+
+    private $pid;
 	private $port;
 	
 	private $cookie_file = false;
@@ -78,6 +78,8 @@ class TorProxy
     /**
      * @param string $url
      * @param array|false $post
+     * @throws TorProxyException
+     * @return string
      */
     public function getPage($url, $post = false)
     {
