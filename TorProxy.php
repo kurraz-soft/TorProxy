@@ -117,7 +117,7 @@ class TorProxy
 	public function destroy()
 	{
 		exec('kill '.$this->pid);
-		unlink(dirname(__FILE__).'/ports/'.$this->port);
+		unlink($this->getPortsDir().'/'.$this->port);
 	}
 
     public function init($port = false)
