@@ -155,7 +155,7 @@ class TorProxy
         $busyPorts = array();
         while(($file = readdir($dir)) !== false)
         {
-            if(is_file($file))
+            if(is_file($this->getPortsDir().'/'.$file))
             {
                 $busyPorts[] = (int)$file;
             }
