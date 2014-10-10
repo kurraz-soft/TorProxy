@@ -13,6 +13,7 @@ class TorProxy
 	private $cookie_vars = false;
     private $auto_reload = false;
     private $connections_count = 0;
+    private $delay_get_page = 0;
 	
     function __construct($port = false)
     {
@@ -38,6 +39,16 @@ class TorProxy
 	}
 
     /**
+     * @param int $seconds
+     * @return $this
+     */
+    public function setDelayGetPage($seconds)
+    {
+        $this->delay_get_page = $seconds;
+        return $this;
+    }
+
+    /**
      * Reloads tor after n connections
      * @param int $after_n_connections
      * @return TorProxy
@@ -56,6 +67,10 @@ class TorProxy
      */
     public function getPage($url, $post = false)
     {
+        if($this->delay_get_page)
+        {
+            sleep($this->delay_get_page);
+        }
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $url);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
