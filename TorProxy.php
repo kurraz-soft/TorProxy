@@ -140,6 +140,7 @@ class TorProxy
                         $startPort++;
                     }
                 }
+                if(!$port) $port = $startPort;
             }
         }
         $f = fopen($ports_dir.'/'.$port,'w');
