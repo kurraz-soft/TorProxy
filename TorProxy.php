@@ -61,11 +61,11 @@ class TorProxy
     
     /**
      * @param string $url
-     * @param array|false $post
+     * @param array|null $post
      * @throws TorProxyException
      * @return string
      */
-    public function getPage($url, $post = false)
+    public function getPage($url, $post = null)
     {
         if($this->delay_get_page)
         {
@@ -114,7 +114,12 @@ class TorProxy
 		return $out;
 	}
 
-    public function getPageSafe($url,$post = false)
+    /**
+     * @param $url
+     * @param array|null $post
+     * @return string
+     */
+    public function getPageSafe($url,$post = null)
     {
         try{
             return $this->getPage($url,$post);
