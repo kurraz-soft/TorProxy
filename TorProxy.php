@@ -11,6 +11,8 @@ class TorProxy
 	private $cookie_file = false;
 	private $cookie_jar = false;
 	private $cookie_vars = false;
+    private $auto_reload = false;
+    private $connections_count = 0;
 	
     function __construct($port = false)
     {
@@ -33,6 +35,15 @@ class TorProxy
 	{
 		$this->cookie_vars = implode('; ',$vars);
 	}
+
+    /**
+     * Reloads tor after n connections
+     * @param int $after_n_connections
+     */
+    public function setAutoReload($after_n_connections)
+    {
+        $this->auto_reload = $after_n_connections;
+    }
     
     /**
      * @param string $url
@@ -72,6 +83,15 @@ class TorProxy
 		curl_close($ch);
 		
 		if($err) throw new TorProxyException($err);
+
+        $this->connections_count++;
+        if($this->auto_reload)
+        {
+            if($this->connections_count % $this->auto_reload === 0)
+            {
+                $this->reload();
+            }
+        }
 		
 		return $out;
 	}
