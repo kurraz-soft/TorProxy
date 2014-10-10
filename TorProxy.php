@@ -5,8 +5,8 @@ class TorProxy
     const START_PORT = 9050;
 	const DELAY_START = 5;
 
-    private $pid;
-	private $port;
+    public $pid;
+	public $port;
 	
 	private $cookie_file = false;
 	private $cookie_jar = false;
@@ -116,8 +116,24 @@ class TorProxy
 	
 	public function destroy()
 	{
+		unlink($this->getPortsDir().'/'.$this->port);
+		$dir = $this->getPortsDir().'/data'.$this->port;
+		$it = new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS);
+		$files = new RecursiveIteratorIterator($it,
+					 RecursiveIteratorIterator::CHILD_FIRST);
+		foreach($files as $file) {
+			if ($file->getFilename() === '.' || $file->getFilename() === '..') {
+				continue;
+			}
+			if ($file->isDir()){
+				rmdir($file->getRealPath());
+			} else {
+				@unlink($file->getRealPath());
+			}
+		}
+		rmdir($dir);
+		
 		exec('kill '.$this->pid);
-		unlink(dirname(__FILE__).'/ports/'.$this->port);
 	}
 
     public function init($port = false)
@@ -151,10 +167,15 @@ class TorProxy
             }
         }
         $f = fopen($ports_dir.'/'.$port,'w');
-        fprintf($f,"SocksPort %d\nSocksListenAddress 127.0.0.1\n",$port);
+        fprintf($f,"SocksPort %d\nSocksListenAddress 127.0.0.1\nDataDirectory ".$ports_dir."/data%d\n",$port,$port);
         fclose($f);
+        if(!file_exists($ports_dir.'/data'.$port))
+        {
+			mkdir($ports_dir.'/data'.$port);
+		}
 
         $this->pid = $this->_start_process('tor -f '.$ports_dir.'/'.$port);
+        if(!$this->pid) throw new TorProxyException("can't create process");
         $this->port = $port;
         sleep(self::DELAY_START);
     }
@@ -189,7 +210,7 @@ class TorProxy
     private function _start_process($command)
     {
         $command = $command.' > /dev/null 2>&1 & echo $!'; 
-        exec($command ,$op); 
+        exec($command, $op); 
         $pid = (int)$op[0]; 
 
         if($pid!="") return $pid; 
