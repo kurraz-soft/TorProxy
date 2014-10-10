@@ -114,7 +114,7 @@ class TorProxy
 		return $out;
 	}
 
-    public function getPageSafe($url,$post)
+    public function getPageSafe($url,$post = false)
     {
         try{
             return $this->getPage($url,$post);
