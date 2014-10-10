@@ -113,6 +113,17 @@ class TorProxy
 		
 		return $out;
 	}
+
+    public function getPageSafe($url,$post)
+    {
+        try{
+            return $this->getPage($url,$post);
+        }catch (TorProxyException $e)
+        {
+            $this->reload();
+            return $this->getPageSafe($url,$post);
+        }
+    }
 	
 	public function destroy()
 	{
