@@ -14,48 +14,7 @@ class TorProxy
 	
     function __construct($port = false)
     {
-		$ports_dir = dirname(__FILE__).'/ports';
-		
-		if(!is_dir($ports_dir)) mkdir($ports_dir);
-			
-		if(!$port)
-		{
-			$dir = opendir($ports_dir);
-			$busyPorts = array();
-			while($file = readdir($dir) !== false)
-			{
-				if(is_file($file))
-				{
-					$busyPorts[] = (int)$file;
-				}
-			}
-			if(!$busyPorts)
-			{
-				$port = self::START_PORT + 1;
-			}else
-			{
-				sort($busyPorts);
-				$startPort = self::START_PORT + 1;
-				foreach($busyPorts as $p)
-				{
-					if($p > $startPort)
-					{
-						$port = $startPort;
-						break;
-					}else
-					{
-						$startPort++;
-					}
-				}
-			}
-		}
-		$f = fopen($ports_dir.'/'.$port,'w');
-		fprintf($f,"SocksPort %d\nSocksListenAddress 127.0.0.1\n",$port);
-		fclose($f);
-		
-        $this->pid = $this->_start_process('tor -f '.$ports_dir.'/'.$port);
-        $this->port = $port;
-        sleep(self::DELAY_START);
+        $this->init($port);
     }
     
     public function setCookieFile($filepath)
@@ -122,6 +81,58 @@ class TorProxy
 		exec('kill '.$this->pid);
 		unlink(dirname(__FILE__).'/ports/'.$this->port);
 	}
+
+    public function init($port = false)
+    {
+        $ports_dir = dirname(__FILE__).'/ports';
+
+        if(!is_dir($ports_dir)) mkdir($ports_dir);
+
+        if(!$port)
+        {
+            $dir = opendir($ports_dir);
+            $busyPorts = array();
+            while($file = readdir($dir) !== false)
+            {
+                if(is_file($file))
+                {
+                    $busyPorts[] = (int)$file;
+                }
+            }
+            if(!$busyPorts)
+            {
+                $port = self::START_PORT + 1;
+            }else
+            {
+                sort($busyPorts);
+                $startPort = self::START_PORT + 1;
+                foreach($busyPorts as $p)
+                {
+                    if($p > $startPort)
+                    {
+                        $port = $startPort;
+                        break;
+                    }else
+                    {
+                        $startPort++;
+                    }
+                }
+            }
+        }
+        $f = fopen($ports_dir.'/'.$port,'w');
+        fprintf($f,"SocksPort %d\nSocksListenAddress 127.0.0.1\n",$port);
+        fclose($f);
+
+        $this->pid = $this->_start_process('tor -f '.$ports_dir.'/'.$port);
+        $this->port = $port;
+        sleep(self::DELAY_START);
+    }
+
+    public function reload()
+    {
+        $this->destroy();
+        $this->init($this->port);
+    }
 
     private function _start_process($command)
     {
