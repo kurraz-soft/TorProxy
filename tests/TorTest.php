@@ -5,8 +5,8 @@ class TorTest extends PHPUnit_Framework_TestCase
 {
     public function testGetPage()
     {
-        $tor = new TorProxy();
         try{
+			$tor = new TorProxy();
 			$html = $tor->getPage('http://ya.ru');
 			$this->assertNotEmpty($html);
 		}catch(TorProxyException $e)
@@ -22,4 +22,25 @@ class TorTest extends PHPUnit_Framework_TestCase
         $this->assertNotEmpty($tor->getBusyPorts());
         $tor->destroy();
     }
+    
+    public function testReload()
+    {
+		try{
+			$tor = new TorProxy();
+			$html = $tor->getPage('http://ya.ru');
+			$this->assertNotEmpty($html);
+			$tor->reload();
+			try{
+				$html = $tor->getPage('http://ya.ru');
+				$this->assertNotEmpty($html);
+			}catch(TorProxyException $e)
+			{
+				$this->fail($e->getMessage());
+			}
+		}catch(TorProxyException $e)
+		{
+			$this->fail($e->getMessage());
+		}
+		$tor->destroy();
+	}
 }
