@@ -34,15 +34,18 @@ class TorProxy
 	public function setCookieVar($vars)
 	{
 		$this->cookie_vars = implode('; ',$vars);
+        return $this;
 	}
 
     /**
      * Reloads tor after n connections
      * @param int $after_n_connections
+     * @return TorProxy
      */
     public function setAutoReload($after_n_connections)
     {
         $this->auto_reload = $after_n_connections;
+        return $this;
     }
     
     /**
@@ -152,6 +155,7 @@ class TorProxy
     {
         $this->destroy();
         $this->init($this->port);
+        return $this;
     }
 
     private function _start_process($command)
