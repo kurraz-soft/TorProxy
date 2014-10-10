@@ -107,21 +107,13 @@ class TorProxy
 
     public function init($port = false)
     {
-        $ports_dir = dirname(__FILE__).'/ports';
+        $ports_dir = $this->getPortsDir();
 
         if(!is_dir($ports_dir)) mkdir($ports_dir);
 
         if(!$port)
         {
-            $dir = opendir($ports_dir);
-            $busyPorts = array();
-            while($file = readdir($dir) !== false)
-            {
-                if(is_file($file))
-                {
-                    $busyPorts[] = (int)$file;
-                }
-            }
+            $busyPorts = $this->getBusyPorts();
             if(!$busyPorts)
             {
                 $port = self::START_PORT + 1;
@@ -150,6 +142,25 @@ class TorProxy
         $this->pid = $this->_start_process('tor -f '.$ports_dir.'/'.$port);
         $this->port = $port;
         sleep(self::DELAY_START);
+    }
+
+    public function getPortsDir()
+    {
+        return dirname(__FILE__).'/ports';
+    }
+
+    public function getBusyPorts()
+    {
+        $dir = opendir($this->getPortsDir());
+        $busyPorts = array();
+        while($file = readdir($dir) !== false)
+        {
+            if(is_file($file))
+            {
+                $busyPorts[] = (int)$file;
+            }
+        }
+        return $busyPorts;
     }
 
     public function reload()

@@ -15,4 +15,11 @@ class TorTest extends PHPUnit_Framework_TestCase
 		}
 		$tor->destroy();
     }
+
+    public function testGetButyPorts()
+    {
+        $tor = new TorProxy();
+        $this->assertNotEmpty($tor->getBusyPorts());
+        $tor->destroy();
+    }
 }
